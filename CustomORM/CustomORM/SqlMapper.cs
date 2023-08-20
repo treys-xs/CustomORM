@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using CustomORM.Interfaces;
+using Npgsql;
 using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,16 +12,15 @@ namespace CustomORM
             GetStringMethod = typeof(DataReaderExtensions).GetMethod("GetString")!,
             GetInt32Method = typeof(DataReaderExtensions).GetMethod("GetInt32")!;
 
-        public async Task<List<T>> MapAsync<T>(NpgsqlConnection connection, string sql, CancellationToken cancellationToken)
+        public async Task<List<T>> MapAsync<T>(IConnection connection, string sql, CancellationToken cancellationToken)
         {
-            await using var command = connection.CreateCommand();
-            command.CommandText = sql;
-            await using var reader = await command.ExecuteReaderAsync();
+            await using var command = connection.CreateCommand(sql);
+            using var reader = await command.ExecuteReaderAsync();
 
             var listEntity = new List<T>();
             Func<IDataReader, T> mapper = BuildMapper<T>();
 
-            while (await reader.ReadAsync(cancellationToken))
+            while (reader.Read())
             {
                 listEntity.Add(mapper(reader));
             }

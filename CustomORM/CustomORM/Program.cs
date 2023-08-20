@@ -1,9 +1,10 @@
 ﻿using CustomORM;
+using CustomORM.DataBaseRealization.PostgreSQL;
 using Npgsql;
 using System.ComponentModel.DataAnnotations;
 
 var mapper = new SqlMapper();
-await using var connection = new NpgsqlConnection("Host=localhost;Database=postgres;User Id=postgres;Password=123");
+await using var connection = new PgsqlConnectionAdapter("Host=localhost;Database=postgres;User Id=postgres;Password=123");
 await connection.OpenAsync();
 var sql =  """
  SELECT * FROM "Games";
