@@ -10,9 +10,9 @@ namespace CustomORM.DataBaseRealization.PostgreSQL
         public PgsqlCommandAdapter(NpgsqlCommand command) =>
             _command = command;
 
-        public async Task<IDataReader> ExecuteReaderAsync()
+        public async Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken)
         {
-           return await _command.ExecuteReaderAsync();
+           return await _command.ExecuteReaderAsync(cancellationToken);
         }
 
         public async ValueTask DisposeAsync()

@@ -9,6 +9,6 @@ namespace CustomORM.Interfaces
 {
     public interface ICommand : IAsyncDisposable
     {
-        Task<IDataReader> ExecuteReaderAsync();
+        Task<IDataReader> ExecuteReaderAsync(CancellationToken cancellationToken);
     }
 }

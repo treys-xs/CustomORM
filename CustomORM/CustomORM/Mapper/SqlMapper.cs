@@ -1,5 +1,6 @@
 ﻿using CustomORM.Interfaces;
 using Npgsql;
+using System.Collections;
 using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,7 +16,7 @@ namespace CustomORM
         public async Task<List<T>> MapAsync<T>(IConnection connection, string sql, CancellationToken cancellationToken)
         {
             await using var command = connection.CreateCommand(sql);
-            using var reader = await command.ExecuteReaderAsync();
+            using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
             var listEntity = new List<T>();
             Func<IDataReader, T> mapper = BuildMapper<T>();
@@ -24,8 +25,18 @@ namespace CustomORM
             {
                 listEntity.Add(mapper(reader));
             }
-
+            
             return listEntity;
+        }
+
+        public async Task<IList> MapAsyncType(IConnection connection, Type typeEntity, string sql, CancellationToken cancellationToken)
+        {
+            var entityMap = (Task)typeof(SqlMapper).GetMethod("MapAsync")
+                .MakeGenericMethod(typeEntity)
+                .Invoke(this, new object[] { connection, sql, cancellationToken});
+            await entityMap;
+            dynamic result = entityMap;
+            return result.Result;
         }
 
         private Func<IDataReader, T> BuildMapper<T>()

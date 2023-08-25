@@ -1,17 +1,15 @@
 ﻿using CustomORM;
+using CustomORM.DataBaseContext;
 using CustomORM.DataBaseRealization.PostgreSQL;
-using Npgsql;
-using System.ComponentModel.DataAnnotations;
 
 var mapper = new SqlMapper();
 await using var connection = new PgsqlConnectionAdapter("Host=localhost;Database=postgres;User Id=postgres;Password=123");
 await connection.OpenAsync();
-var sql =  """
- SELECT * FROM "Games";
- """;
-
-foreach(var game in await mapper.MapAsync<Game>(connection, sql, CancellationToken.None))
-    Console.WriteLine($"{game.Id}, {game.Name}");
+var context = new TestDbContext(connection);
+var result = context.Games.Where(x => x.Id > 1).Select(x => new Game { Id = x.Id, Name = x.Name });
+var results = result.ToArray();
+foreach (var item in results)
+    Console.WriteLine($"{item.Name}, {item.Id}");
 
 public class Game 
 { 
